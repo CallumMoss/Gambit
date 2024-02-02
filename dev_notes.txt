@@ -1,0 +1,11 @@
+Motivation For Bit Boards
+- We use 6 piece bit boards and 2 colour bit boards
+- To find the white pawns, you find the intersection of the desired colour bit board and piece bit board.
+- 64 bit unsigned integers used to represent the chess board.
+- Board representation uses LERF standard.
+- In binary, the square represents the position in the unsigned integer.
+- For example: A rook's bit board at the start of the game would look like this:
+  - 0b1000000100000000000000000000000000000000000000000000000010000001
+  - Starting from right to left, as normal with binary, u64[0] is true to represent the rook on A1
+  - Or also thought of as rook on 00. At u64[7] is another rook, because its on H1, also seen as 07.
+  - Using b tells the compiler to see this number as a binary instead of decimal number and the beginning 0 prevents it from being seen as a variable name.
