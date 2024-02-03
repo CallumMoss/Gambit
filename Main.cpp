@@ -1,6 +1,8 @@
-#include <iostream>
+// Main.cpp
+
+#include "Tests.h"
 
 int main() {
-    std::cout << "Hello World!";
+    run_fen_tests();
     return 0;
 }
