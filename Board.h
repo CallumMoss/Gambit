@@ -6,6 +6,11 @@
 #include <cstdint>
 #include <sstream>
 #include <vector>
+#include <cctype>
+#include <iostream>
+
+
+void PrintBB(uint64_t board, bool mirrored);
 
 class Board {
 	private:
@@ -16,7 +21,8 @@ class Board {
 		uint64_t white_pieces, black_pieces = 0ULL;
 
 		char turn; // w for white, b for black
-		bool white_castling_rights, black_castling_rights;
+		bool white_short_castling_rights, black_short_castling_rights = false;
+		bool white_long_castling_rights, black_long_castling_rights = false;
 		uint64_t en_passant_target_square = 0ULL;
 		int half_move_clock; // number of half moves, to test for 50 move rule
 		int full_move_counter; // how many moves have been played
@@ -33,11 +39,16 @@ class Board {
 		uint64_t get_black_pieces();
 
 		char get_turn();
-		bool get_white_castling_rights();
-		bool get_black_castling_rights();
+		bool get_white_short_castling_rights();
+		bool get_white_long_castling_rights();
+		bool get_black_short_castling_rights();
+		bool get_black_long_castling_rights();
 		uint64_t get_en_passant_target_square();
 		int get_half_move_clock();
 		int get_full_move_counter();
 
 		void update_bitboards_from_fen(const std::string&);
+
+		bool piece_is_at_square(uint64_t, int);
+		void print_board();
 };
