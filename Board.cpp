@@ -1,7 +1,6 @@
 // Board.cpp
 
 #include "Board.h"
-#include "utils.h"
 
 uint64_t Board::get_pawns() { return pawns; }
 uint64_t Board::get_knights() { return knights; }
@@ -13,6 +12,16 @@ uint64_t Board::get_kings() { return kings; }
 uint64_t Board::get_white_pieces() { return white_pieces; }
 uint64_t Board::get_black_pieces() { return black_pieces; }
 
+void Board::set_pawns(uint64_t pawns) { this->pawns = pawns; }
+void Board::set_knights(uint64_t knights) { this->knights = knights; }
+void Board::set_bishops(uint64_t bishops) { this->bishops = bishops; }
+void Board::set_rooks(uint64_t rooks) { this->rooks = rooks; }
+void Board::set_queens(uint64_t queens) { this->queens = queens; }
+void Board::set_kings(uint64_t kings) { this->queens = queens; }
+
+void Board::set_white_pieces(uint64_t white_pieces) { this->white_pieces = white_pieces; }
+void Board::set_black_pieces(uint64_t black_pieces) { this->black_pieces = black_pieces; }
+
 char Board::get_turn() { return turn; }
 bool Board::get_white_short_castling_rights() { return white_short_castling_rights; }
 bool Board::get_white_long_castling_rights() { return white_long_castling_rights; }
@@ -21,6 +30,17 @@ bool Board::get_black_long_castling_rights() { return black_long_castling_rights
 uint64_t Board::get_en_passant_target_square() { return en_passant_target_square; }
 int Board::get_half_move_clock() { return half_move_clock; }
 int Board::get_full_move_counter() { return full_move_counter; }
+
+
+bool Board::piece_is_at_square(uint64_t board, int square) {
+    return (board & (1ULL << square)) != 0;
+}
+
+void Board::print_bit_string(uint64_t bit_string) {
+    // Print the binary representation using std::bitset
+    std::cout << "Binary representation: " << std::bitset<64>(bit_string) << std::endl;
+}
+
 
 void Board::update_bitboards_from_fen(const std::string& fen) { // reference to fen that must remain constant
     // can add and check for invalid fens in the future
@@ -148,31 +168,24 @@ void Board::print_board() {
         //if(board[i].isUpper())
         if (piece_is_at_square(white_pawns, i)){
            board[i] = 'P';
-           continue;
         }
         else if (piece_is_at_square(white_knights, i)) {
             board[i] = 'N';
-            continue;
         }
         else if (piece_is_at_square(white_bishops, i)) {
             board[i] = 'B';
-            continue;
         }
         else if (piece_is_at_square(white_rooks, i)) {
             board[i] = 'R';
-            continue;
         }
         else if (piece_is_at_square(white_queen, i)) {
             board[i] = 'Q';
-            continue;
         }
         else if (piece_is_at_square(white_king, i)) {
             board[i] = 'K';
-            continue;
         }
         else if (piece_is_at_square(white_rooks, i)) {
             board[i] = 'R';
-            continue;
         }
         else if (piece_is_at_square(black_pawns, i)) {
             board[i] = 'p';
@@ -213,7 +226,7 @@ void Board::print_board() {
 
 // move gen: generate the bitboards for each possible moving position, store them in an array, then use alpha beta negamax
 
-std::vector<uint64_t> Board::move_gen() {
+/*std::vector<std::vector<uint64_t>>Board::move_gen() {
     std::vector<std::vector<uint64_t>> moves = {{}};
     if (engine_colour == 'w') {
         uint64_t white_remaining_pieces = white_pieces;
@@ -244,9 +257,68 @@ std::vector<uint64_t> Board::move_gen() {
     }
     else {}
     //return knight_move_gen(i);
-}
+}*/
 
 std::vector<uint64_t> Board::knight_move_gen(int square) {
     std::vector<uint64_t> knight_moves = {};
-    uint64_t bit_square = 1ULL << square;
+    uint64_t own_pieces = white_pieces;
+    if (turn == 'b') {
+        own_pieces = black_pieces;
+    }
+
+    if((square % 8 != 0) && (square % 8 != 1) && (square >= 8)) {// should be checking left two columns and bottom row
+        if (!piece_is_at_square(own_pieces, square - 10)) { // if there isnt its own piece on the target square
+            uint64_t move_left_down = ((1ULL) << (square - 10)); // if on square 26, moves left to 24, then down a rank by 8 to 16
+            knight_moves.push_back(move_left_down);
+        }
+    }
+    if ((square % 8 != 7) && (square % 8 != 6) && (square >= 8)) {
+        if (!piece_is_at_square(own_pieces, square - 6)) { // if there isnt its own piece on the target square
+            uint64_t move_right_down = ((1ULL) << (square - 6)); // -8 for down, + 2 for right
+            knight_moves.push_back(move_right_down);
+        }
+    }
+    if ((square % 8 != 0) && (square % 8 != 1) && (square < 56)) {
+        if (!piece_is_at_square(own_pieces, square + 6)) { // if there isnt its own piece on the target square
+            uint64_t move_left_up = ((1ULL) << (square + 6));
+            knight_moves.push_back(move_left_up);
+        }
+    }
+    if ((square % 8 != 7) && (square % 8 != 6) && (square < 56)) {
+        if (!piece_is_at_square(own_pieces, square = 10)) { // if there isnt its own piece on the target square
+            uint64_t move_right_up = ((1ULL) << (square + 10));
+            knight_moves.push_back(move_right_up);
+        }
+    }
+
+    if ((square % 8 != 0) && (square < 48)) {
+        if (!piece_is_at_square(own_pieces, square + 15)) { // if there isnt its own piece on the target square
+            uint64_t move_up_left = ((1ULL) << (square + 15));
+            knight_moves.push_back(move_up_left);
+        }
+    }
+    if ((square % 8 != 7) && (square < 48)) {
+        if (!piece_is_at_square(own_pieces, square + 17)) { // if there isnt its own piece on the target square
+            uint64_t move_up_right = ((1ULL) << (square + 17));
+            knight_moves.push_back(move_up_right);
+        }
+    }
+    if ((square % 8 != 0) && (square >= 16)) {
+        if (!piece_is_at_square(own_pieces, square - 17)) { // if there isnt its own piece on the target square
+            uint64_t move_down_left = ((1ULL) << (square - 17));
+            knight_moves.push_back(move_down_left);
+        }
+    }
+    if ((square % 8 != 7) && (square >= 8)) {
+        if (!piece_is_at_square(own_pieces, square - 15)) { // if there isnt its own piece on the target square
+            uint64_t move_down_right = ((1ULL) << (square - 15));
+            knight_moves.push_back(move_down_right);
+        }
+    }
+
+    return knight_moves;
+}
+
+void make_move() {
+    return;
 }
