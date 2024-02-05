@@ -1,8 +1,8 @@
 // Board.cpp
 
 #include "Board.h"
+#include "utils.h"
 
-// const means that the getters dont modify the values
 uint64_t Board::get_pawns() { return pawns; }
 uint64_t Board::get_knights() { return knights; }
 uint64_t Board::get_bishops() { return bishops; }
@@ -21,41 +21,6 @@ bool Board::get_black_long_castling_rights() { return black_long_castling_rights
 uint64_t Board::get_en_passant_target_square() { return en_passant_target_square; }
 int Board::get_half_move_clock() { return half_move_clock; }
 int Board::get_full_move_counter() { return full_move_counter; }
-
-
-
-
-void PrintBB(uint64_t board, bool mirrored)
-{
-    std::string output{}, current_line{};
-    for (int row{ 0 }; row < 8; ++row)
-    {
-        for (int col{ 0 }; col < 8; ++col)
-        {
-            if (((board >> (col + row * 8))) & 1ull)
-            {
-                current_line = mirrored ? current_line + "1 " : "1 " + current_line;
-            }
-            else
-            {
-                current_line = mirrored ? current_line + "0 " : "0 " + current_line;
-            }
-        }
-        current_line += "|" + std::to_string(row + 1) + " \n";
-        output = current_line + output;
-        current_line = "";
-    }
-    output += "----------------\n";
-    output += mirrored ? "A B C D E F G H" : "H G F E D C B A";
-    std::cout << (output) << std::endl;
-}
-
-
-
-
-
-
-
 
 void Board::update_bitboards_from_fen(const std::string& fen) { // reference to fen that must remain constant
     // can add and check for invalid fens in the future
@@ -162,11 +127,6 @@ void Board::update_bitboards_from_fen(const std::string& fen) { // reference to 
     }
 }
 
-bool Board::piece_is_at_square(uint64_t board, int square) {
-    return (board & (1ULL << square)) != 0;
-}
-
-
 void Board::print_board() {
     // get the or of white and black pieces
     uint64_t white_pawns = pawns & white_pieces;
@@ -252,3 +212,41 @@ void Board::print_board() {
 }
 
 // move gen: generate the bitboards for each possible moving position, store them in an array, then use alpha beta negamax
+
+std::vector<uint64_t> Board::move_gen() {
+    std::vector<std::vector<uint64_t>> moves = {{}};
+    if (engine_colour == 'w') {
+        uint64_t white_remaining_pieces = white_pieces;
+        for (int i = 0; i < 64 && white_remaining_pieces != 0ULL; i++) { 
+            if (piece_is_at_square(white_pieces, i)) {
+                white_remaining_pieces = white_remaining_pieces & 0ULL << i; // after calculates, eliminates piece
+                // do stuff
+                if (piece_is_at_square(white_pieces & pawns, i)) {
+
+                }
+                else if (piece_is_at_square(white_pieces & knights, i)) {
+                    moves.push_back(knight_move_gen(i));
+                }
+                else if (piece_is_at_square(white_pieces & bishops, i)) {
+
+                }
+                else if (piece_is_at_square(white_pieces & rooks, i)) {
+
+                }
+                else if (piece_is_at_square(white_pieces & queens, i)) {
+
+                }
+                else { // if king
+
+                }
+            }
+        }
+    }
+    else {}
+    //return knight_move_gen(i);
+}
+
+std::vector<uint64_t> Board::knight_move_gen(int square) {
+    std::vector<uint64_t> knight_moves = {};
+    uint64_t bit_square = 1ULL << square;
+}

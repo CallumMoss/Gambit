@@ -27,6 +27,8 @@ class Board {
 		int half_move_clock; // number of half moves, to test for 50 move rule
 		int full_move_counter; // how many moves have been played
 
+		char engine_colour = 'w';
+
 	public:
 		uint64_t get_pawns();
 		uint64_t get_knights();
@@ -51,4 +53,7 @@ class Board {
 
 		bool piece_is_at_square(uint64_t, int);
 		void print_board();
+
+		std::vector<uint64_t> move_gen();
+		std::vector<uint64_t> knight_move_gen(int);
 };
