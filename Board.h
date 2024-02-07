@@ -9,6 +9,7 @@
 #include <iostream>
 #include <cstdint>
 #include <bitset>
+#include <bit>
 
 class Board {
 	private:
@@ -66,6 +67,9 @@ class Board {
 
 		void print_board();
 
-		//std::vector<uint64_t> move_gen();
+		std::vector<std::vector<uint64_t>> move_gen();
 		std::vector<uint64_t> knight_move_gen(int);
+
+		void make_move();
+		int get_ls1b(uint64_t);
 };

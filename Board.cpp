@@ -138,7 +138,7 @@ void Board::update_bitboards_from_fen(const std::string& fen) { // reference to 
                 en_passant_target_square = 1ULL << ((word[1] - 1) * 8 + file_number);
                 break;
             case 4: // how many half moves have been played
-                half_move_clock = std::stoi(word); // converts from string to int
+                half_move_clock = std::stoi(word); // string to integer
                 break;
             case 5: // how many moves have been played
                 full_move_counter = std::stoi(word);
@@ -226,7 +226,7 @@ void Board::print_board() {
 
 // move gen: generate the bitboards for each possible moving position, store them in an array, then use alpha beta negamax
 
-/*std::vector<std::vector<uint64_t>>Board::move_gen() {
+std::vector<std::vector<uint64_t>>Board::move_gen() {
     std::vector<std::vector<uint64_t>> moves = {{}};
     if (engine_colour == 'w') {
         uint64_t white_remaining_pieces = white_pieces;
@@ -256,11 +256,12 @@ void Board::print_board() {
         }
     }
     else {}
-    //return knight_move_gen(i);
-}*/
+    return moves;
+}
 
 std::vector<uint64_t> Board::knight_move_gen(int square) {
     std::vector<uint64_t> knight_moves = {};
+    uint64_t board = get_white_pieces() | get_black_pieces();
     uint64_t own_pieces = white_pieces;
     if (turn == 'b') {
         own_pieces = black_pieces;
@@ -268,53 +269,86 @@ std::vector<uint64_t> Board::knight_move_gen(int square) {
 
     if((square % 8 != 0) && (square % 8 != 1) && (square >= 8)) {// should be checking left two columns and bottom row
         if (!piece_is_at_square(own_pieces, square - 10)) { // if there isnt its own piece on the target square
-            uint64_t move_left_down = ((1ULL) << (square - 10)); // if on square 26, moves left to 24, then down a rank by 8 to 16
+            uint64_t target_square = ((1ULL) << (square - 10)); // if on square 26, moves left to 24, then down a rank by 8 to 16
+            uint64_t move_left_down = board | target_square; // get board, plus target square
+            move_left_down &= ~(1ULL << square); // remove original square
             knight_moves.push_back(move_left_down);
         }
     }
     if ((square % 8 != 7) && (square % 8 != 6) && (square >= 8)) {
-        if (!piece_is_at_square(own_pieces, square - 6)) { // if there isnt its own piece on the target square
-            uint64_t move_right_down = ((1ULL) << (square - 6)); // -8 for down, + 2 for right
+        if (!piece_is_at_square(own_pieces, square - 6)) {
+            uint64_t target_square = ((1ULL) << (square - 6)); // -8 for down, + 2 for right
+            uint64_t move_right_down = board | target_square;
+            move_right_down &= ~(1ULL << square); 
             knight_moves.push_back(move_right_down);
         }
     }
     if ((square % 8 != 0) && (square % 8 != 1) && (square < 56)) {
-        if (!piece_is_at_square(own_pieces, square + 6)) { // if there isnt its own piece on the target square
-            uint64_t move_left_up = ((1ULL) << (square + 6));
+        if (!piece_is_at_square(own_pieces, square + 6)) {
+            uint64_t target_square = ((1ULL) << (square + 6));
+            uint64_t move_left_up = board | target_square;
+            move_left_up &= ~(1ULL << square);
             knight_moves.push_back(move_left_up);
         }
     }
     if ((square % 8 != 7) && (square % 8 != 6) && (square < 56)) {
-        if (!piece_is_at_square(own_pieces, square = 10)) { // if there isnt its own piece on the target square
-            uint64_t move_right_up = ((1ULL) << (square + 10));
+        if (!piece_is_at_square(own_pieces, square + 10)) {
+            uint64_t target_square = ((1ULL) << (square + 10));
+            uint64_t move_right_up = board | target_square;
+            move_right_up &= ~(1ULL << square);
             knight_moves.push_back(move_right_up);
         }
     }
 
     if ((square % 8 != 0) && (square < 48)) {
-        if (!piece_is_at_square(own_pieces, square + 15)) { // if there isnt its own piece on the target square
-            uint64_t move_up_left = ((1ULL) << (square + 15));
+        if (!piece_is_at_square(own_pieces, square + 15)) {
+            uint64_t target_square = ((1ULL) << (square + 15));
+            uint64_t move_up_left = board | target_square;
+            move_up_left &= ~(1ULL << square);
             knight_moves.push_back(move_up_left);
         }
     }
     if ((square % 8 != 7) && (square < 48)) {
-        if (!piece_is_at_square(own_pieces, square + 17)) { // if there isnt its own piece on the target square
-            uint64_t move_up_right = ((1ULL) << (square + 17));
+        if (!piece_is_at_square(own_pieces, square + 17)) {
+            uint64_t target_square = ((1ULL) << (square + 17));
+            uint64_t move_up_right = board | target_square;
+            move_up_right &= ~(1ULL << square);
             knight_moves.push_back(move_up_right);
         }
     }
     if ((square % 8 != 0) && (square >= 16)) {
-        if (!piece_is_at_square(own_pieces, square - 17)) { // if there isnt its own piece on the target square
-            uint64_t move_down_left = ((1ULL) << (square - 17));
+        if (!piece_is_at_square(own_pieces, square - 17)) {
+            uint64_t target_square = ((1ULL) << (square - 17));
+            uint64_t move_down_left = board | target_square;
+            move_down_left &= ~(1ULL << square);
             knight_moves.push_back(move_down_left);
         }
     }
     if ((square % 8 != 7) && (square >= 8)) {
-        if (!piece_is_at_square(own_pieces, square - 15)) { // if there isnt its own piece on the target square
-            uint64_t move_down_right = ((1ULL) << (square - 15));
+        if (!piece_is_at_square(own_pieces, square - 15)) { 
+            uint64_t target_square = ((1ULL) << (square - 15));
+            uint64_t move_down_right = board | target_square;
+            move_down_right &= ~(1ULL << square);
             knight_moves.push_back(move_down_right);
         }
     }
+
+
+
+    // "a Move object, containing source, dest and whatever flags you want (e.g. en passant)"
+    // check discord
+
+
+
+    // How do I update the various boards? also how do i allow its capture to be clear?
+    // Do I return a few arrays, and change the return type to a vector of vectors and then move gen to vectors of vectors of vectors? Lol
+
+
+
+
+
+
+
 
     return knight_moves;
 }
@@ -322,3 +356,9 @@ std::vector<uint64_t> Board::knight_move_gen(int square) {
 void make_move() {
     return;
 }
+
+int get_ls1b(uint64_t bit_string) {
+    int index = std::countr_zero(bit_string);
+    return (index < 64) ? index : -1;
+}
+

@@ -5,6 +5,32 @@
 
 #include <cassert>
 
+void PrintBB(uint64_t board, bool mirrored)
+{
+	std::string output{}, current_line{};
+	for (int row{ 0 }; row < 8; ++row)
+	{
+		for (int col{ 0 }; col < 8; ++col)
+		{
+			if (((board >> (col + row * 8))) & 1ull)
+			{
+				current_line = mirrored ? current_line + "1 " : "1 " + current_line;
+			}
+			else
+			{
+				current_line = mirrored ? current_line + "0 " : "0 " + current_line;
+			}
+		}
+		current_line += "|" + std::to_string(row + 1) + " \n";
+		output = current_line + output;
+		current_line = "";
+	}
+	output += "----------------\n";
+	output += mirrored ? "A B C D E F G H" : "H G F E D C B A";
+	std::cout << (output);
+}
+
+
 void run_fen_tests() {
 	Board board = Board();
 	// Testing from the start position
@@ -57,18 +83,27 @@ void run_fen_tests() {
 
 
 
-
 	// Testing knight moves
-	board.update_bitboards_from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-	std::vector<uint64_t> arr = board.knight_move_gen(1);
+	board.update_bitboards_from_fen("rnbqkbnr/pppppppp/8/3N4/8/8/PPPPPPPP/R1BQKBNR w KQkq - 0 1");
+	std::vector<uint64_t> arr = board.knight_move_gen(35);
+	PrintBB(board.get_white_pieces() | board.get_black_pieces(), true);
+
 	for (uint64_t i : arr) {
-		board.set_knights(i);
-		board.set_white_pieces(i);
+		/*uint64_t new_knights = board.get_knights();
+		uint64_t new_white_pieces = board.get_white_pieces();
+		new_knights &= ~(1ULL << 1);  // the square changes so need to change 27. Do we need to change? Probably not.
+		new_white_pieces &= ~(1ULL << 1);
+		// Add the knight to its new position
+		new_knights |= i;
+		new_white_pieces |= i;
+		// Update the board with the new positions
+		board.set_knights(new_knights);
+		board.set_white_pieces(new_white_pieces);
 
-		// must update by keeping previous bits. Maybe find bit location and original and swap values
-
-		board.print_board();
+		// Perform any additional processing or output here if needed*/
+		PrintBB(i, true);
 	}
+
 
 	// Checking if looks like expected:
 	board.update_bitboards_from_fen("8/8/8/8/8/2N5/8/8 w - - 0 1");
